@@ -9,7 +9,6 @@ import {
   SafeAreaView,
   Alert
 } from 'react-native';
-// Importujeme knihovnu pro ukládání dat
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Ukol {
@@ -17,24 +16,20 @@ interface Ukol {
   text: string;
 }
 
-// Klíč, pod kterým budou úkoly uložené v paměti Samsungu
 const STORAGE_KEY = '@moje_ukoly';
 
 export default function App() {
   const [textUkolu, setTextUkolu] = useState<string>('');
   const [ukoly, setUkoly] = useState<Ukol[]>([]);
 
-  // 1. Načtení úkolů při spuštění aplikace
   useEffect(() => {
     nactiUkoly();
   }, []);
 
-  // 2. Uložení úkolů pokaždé, když se seznam úkolů změní
   useEffect(() => {
     ulozUkoly(ukoly);
   }, [ukoly]);
 
-  // Funkce pro načtení z paměti telefonu
   const nactiUkoly = async () => {
     try {
       const ulozeneUkoly = await AsyncStorage.getItem(STORAGE_KEY);
@@ -46,7 +41,6 @@ export default function App() {
     }
   };
 
-  // Funkce pro uložení do paměti telefonu
   const ulozUkoly = async (noveUkoly: Ukol[]) => {
     try {
       const jsonHodnota = JSON.stringify(noveUkoly);
@@ -77,27 +71,31 @@ export default function App() {
       <Text style={styles.nadpis}>*** Moje Úkoly 📝 ***</Text>
       
       <View style={styles.formular}>
-        <TextInput 
-          style={styles.vstup} 
-          placeholder="Napiš úkol..." 
+        <TextInput
+          style={styles.vstup}
+          placeholder="Napiš úkol..."
           value={textUkolu}
           onChangeText={setTextUkolu}
         />
-        <TouchableOpacity style={styles.tlacitko} onPress={pridejUkol}>
-          <Text style={styles.textTlacitka}>Přidat</Text>
+        <TouchableOpacity style={styles.tlacitkoPridat} onPress={pridejUkol}>
+          <Text style={styles.textTlacitka}>Pridat</Text>
         </TouchableOpacity>
       </View>
 
-      <FlatList 
+      <FlatList
         data={ukoly}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => smazUkol(item.id)}>
-            <View style={styles.polozkaUkolu}>
-              <Text style={styles.textUkolu}>{item.text}</Text>
-              <Text style={styles.ikonaSmazat}>❌</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.polozkaUkolu}>
+            <Text style={styles.textUkolu}>{item.text}</Text>
+            {/* Samostatné tlačítko pro smazání s křížkem */}
+            <TouchableOpacity 
+              style={styles.tlacitkoSmazat} 
+              onPress={() => smazUkol(item.id)}
+            >
+              <Text style={styles.textKrizku}>❌</Text>
+            </TouchableOpacity>
+          </View>
         )}
       />
     </SafeAreaView>
@@ -107,15 +105,15 @@ export default function App() {
 const styles = StyleSheet.create({
   kontejner: {
     flex: 1,
-    backgroundColor: '#e3f2fd',
+    backgroundColor: '#fff',
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingTop: 40,
   },
   nadpis: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
     textAlign: 'center',
+    marginBottom: 20,
   },
   formular: {
     flexDirection: 'row',
@@ -123,42 +121,45 @@ const styles = StyleSheet.create({
   },
   vstup: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 10,
-    fontSize: 16,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#ccc',
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginRight: 10,
+    height: 40,
   },
-  tlacitko: {
+  tlacitkoPridat: {
     backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginLeft: 10,
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    height: 40,
   },
   textTlacitka: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
   },
   polozkaUkolu: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: 'row', // Seřadí text a křížek vedle sebe
+    justifyContent: 'space-between', // Text vlevo, křížek vpravo
     alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 5,
     marginBottom: 10,
     borderWidth: 1,
     borderColor: '#eee',
   },
   textUkolu: {
     fontSize: 16,
-    flex: 1,
+    flex: 1, // Text zabere maximum místa a neodtlačí křížek ven z obrazovky
+    marginRight: 10,
   },
-  ikonaSmazat: {
+  tlacitkoSmazat: {
+    padding: 5, // Větší dotyková plocha pro snadnější kliknutí
+  },
+  textKrizku: {
     fontSize: 16,
   },
 });
