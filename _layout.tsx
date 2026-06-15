@@ -20,7 +20,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Úkoly', // Změněno z Tab One na Úkoly
+          title: 'ToDo Teddy events', // Změněno z Tab One na Úkoly
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{

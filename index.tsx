@@ -7,7 +7,9 @@ import {
   TouchableOpacity, 
   FlatList, 
   SafeAreaView,
-  Alert
+  Alert,
+  BackHandler,
+  Platform
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -37,7 +39,7 @@ export default function App() {
         setUkoly(JSON.parse(ulozeneUkoly));
       }
     } catch (chyba) {
-      Alert.alert('Chyba', 'Nepodařilo se načíst úkoly z paměti.');
+      Alert.alert('Chyba', 'Nepodařilo se načíst z paměti.');
     }
   };
 
@@ -66,38 +68,58 @@ export default function App() {
     setUkoly(ukoly.filter(ukol => ukol.id !== id));
   };
 
+  // Funkce pro zavření aplikace
+  const zavritAplikaci = () => {
+    if (Platform.OS === 'android') {
+      BackHandler.exitApp();
+    } else {
+      Alert.alert(
+        'Ukončení aplikace', 
+        'Systém iOS nedovoluje aplikacím zavírat se X. Pro ukončení použijte gesto plochy - švih...'
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={styles.kontejner}>
-      <Text style={styles.nadpis}>*** Moje Úkoly 📝 ***</Text>
-      
-      <View style={styles.formular}>
-        <TextInput
-          style={styles.vstup}
-          placeholder="Napiš úkol..."
-          value={textUkolu}
-          onChangeText={setTextUkolu}
-        />
-        <TouchableOpacity style={styles.tlacitkoPridat} onPress={pridejUkol}>
-          <Text style={styles.textTlacitka}>Pridat</Text>
+      {/* Horní lišta s nadpisem a zavíracím křížkem */}
+      <View style={styles.listaNahore}>
+        <Text style={styles.nadpis}>Moje úkoly 📝 🧸</Text>
+        <TouchableOpacity style={styles.tlacitkoZavritApp} onPress={zavritAplikaci}>
+          <Text style={styles.textZavritApp}>✕</Text>
         </TouchableOpacity>
       </View>
+      
+      {/* Hlavní obsah pod lištou */}
+      <View style={styles.obsah}>
+        <View style={styles.formular}>
+          <TextInput
+            style={styles.vstup}
+            placeholder="Napiš úkol..."
+            value={textUkolu}
+            onChangeText={setTextUkolu}
+          />
+          <TouchableOpacity style={styles.tlacitkoPridat} onPress={pridejUkol}>
+            <Text style={styles.textTlacitka}>Přidat</Text>
+          </TouchableOpacity>
+        </View>
 
-      <FlatList
-        data={ukoly}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.polozkaUkolu}>
-            <Text style={styles.textUkolu}>{item.text}</Text>
-            {/* Samostatné tlačítko pro smazání s křížkem */}
-            <TouchableOpacity 
-              style={styles.tlacitkoSmazat} 
-              onPress={() => smazUkol(item.id)}
-            >
-              <Text style={styles.textKrizku}>❌</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
+        <FlatList
+          data={ukoly}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.polozkaUkolu}>
+              <Text style={styles.textUkolu}>{item.text}</Text>
+              <TouchableOpacity 
+                style={styles.tlacitkoSmazat} 
+                onPress={() => smazUkol(item.id)}
+              >
+                <Text style={styles.textKrizku}>❌</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -106,14 +128,35 @@ const styles = StyleSheet.create({
   kontejner: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: Platform.OS === 'android' ? 30 : 0, // Ošetření horního panelu u Androidu
+  },
+  listaNahore: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee', // Jemná linka pod lištou
+    backgroundColor: '#fafafa', // Mírně šedé pozadí lišty
+  },
+  obsah: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  tlacitkoZavritApp: {
+    padding: 10, // Větší oblast pro kliknutí prstem
+  },
+  textZavritApp: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#8B0000', // Tmavě červená barva křížku
   },
   nadpis: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
+    color: '#333',
   },
   formular: {
     flexDirection: 'row',
@@ -141,8 +184,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   polozkaUkolu: {
-    flexDirection: 'row', // Seřadí text a křížek vedle sebe
-    justifyContent: 'space-between', // Text vlevo, křížek vpravo
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#f9f9f9',
     padding: 15,
@@ -153,13 +196,13 @@ const styles = StyleSheet.create({
   },
   textUkolu: {
     fontSize: 16,
-    flex: 1, // Text zabere maximum místa a neodtlačí křížek ven z obrazovky
+    flex: 1,
     marginRight: 10,
   },
   tlacitkoSmazat: {
-    padding: 5, // Větší dotyková plocha pro snadnější kliknutí
+    padding: 5,
   },
   textKrizku: {
-    fontSize: 16,
+    fontSize: 18,
   },
 });

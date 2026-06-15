@@ -7,7 +7,7 @@ export default function DescriptionScreen() {
       <View style={styles.obsah}>
         <Text style={styles.nadpis}>Description of App 📝</Text>
         <Text style={styles.text}>
-          Tato mobilní aplikace slouží k přehledné správě vašich každodenních úkolů. 
+          Tato mobilní aplikace slouží ke správě každodenních úkolů / eventů. 
           Všechna data se bezpečně ukládají do lokální paměti vašeho telefonu pomocí AsyncStorage.
         </Text>
         <Text style={styles.autor}>Created by @dH</Text>
